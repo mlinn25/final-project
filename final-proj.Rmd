@@ -1,0 +1,62 @@
+---
+title: "final-proj"
+output: html_document
+date: "2022-11-23"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Libraries
+
+```{r}
+library(Stat2Data)
+library(tidyverse)
+library(mosaic)
+library(ggformula)
+library(tinytex)
+library(dplyr)
+```
+
+## Data
+
+```{r}
+library(readxl)
+statistic_id187073_tickets_sold_at_box_offices_in_the_us_canada1980_2021 <- read_excel("~/Downloads/statistic_id187073_tickets-sold-at-box-offices-in-the-us-canada1980-2021.xlsx", 
+    sheet = "Data")
+box_data <- statistic_id187073_tickets_sold_at_box_offices_in_the_us_canada1980_2021 %>%
+  rename_at(1, ~'Year')
+box_data
+library(readxl)
+statistic_id187300_box_office_market_share_of_disney_in_the_us_canada_2000_2021 <- read_excel("~/Downloads/statistic_id187300_box-office-market-share-of-disney-in-the-us-canada-2000-2021.xlsx", 
+    sheet = "Data")
+disney_data <- statistic_id187300_box_office_market_share_of_disney_in_the_us_canada_2000_2021 %>%
+  select(`Box office market share of Disney in the U.S. & Canada 2000-2021`, ...2) %>%
+  rename_at(1, ~'Year')
+disney_data
+```
+
+
+## Initial EDA
+
+For my final project, I want to examine the relationship between the tickets sold at the box office in the US and Canada and the box office market share of Disney in the US and Canada. I want to statistically show a significance between the number of tickets sold at the box office and the box office market share of Disney to show a correlation between Disney and their advantage of getting more people to see their movies in theaters. Disney is a multibillion dollar company, carrying a significant weight in helping drive more people to the movies based on what they film that year and release it. Both of these data sets come from Statista, a free website with access to millions of data sets. These data sets were collected using public information with ticket sales and the shares of the market. The box office data was collected from 1980-2021, but I will only be looking at the data from 2000-2021, since I am comparing the number of ticket sales each year and how much percentage of Disney is in the box office market share. This data was collected from movie theaters in Canada and the US and was calculated with what percentage Disney makes up those box office tickets/earnings. 
+Null hypothesis: there is no relationship between the amount of tickets sold at the box office and the box office market share of Disney
+Alternate hypothesis: there is a relationship between the amount of tickets sold at the box office and the box office market share of Disney
+
+```{r pressure, echo=FALSE}
+plot(box_data)
+plot(disney_data)
+summary(box_data)
+summary(disney_data)
+
+new_data <- 
+  disney_data %>%
+  select(Year, ...2) %>% 
+  left_join(box_data %>% select(Year, ...2),
+            by = c("Year" = "Year")) 
+plot(new_data)
+summary(new_data)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
