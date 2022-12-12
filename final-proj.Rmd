@@ -26,15 +26,19 @@ library(readxl)
 statistic_id187073_tickets_sold_at_box_offices_in_the_us_canada1980_2021 <- read_excel("~/Downloads/statistic_id187073_tickets-sold-at-box-offices-in-the-us-canada1980-2021.xlsx", 
     sheet = "Data")
 box_data <- statistic_id187073_tickets_sold_at_box_offices_in_the_us_canada1980_2021 %>%
-  rename_at(1, ~'Year')
+  rename_at(1, ~'Year') %>%
+  rename_at(2, ~ 'Tickets') %>%
+  filter(Year > 1999)
 box_data
 library(readxl)
 statistic_id187300_box_office_market_share_of_disney_in_the_us_canada_2000_2021 <- read_excel("~/Downloads/statistic_id187300_box-office-market-share-of-disney-in-the-us-canada-2000-2021.xlsx", 
     sheet = "Data")
 disney_data <- statistic_id187300_box_office_market_share_of_disney_in_the_us_canada_2000_2021 %>%
   select(`Box office market share of Disney in the U.S. & Canada 2000-2021`, ...2) %>%
-  rename_at(1, ~'Year')
+  rename_at(1, ~'Year') %>%
+  rename_at(2, ~'Percent')
 disney_data
+?filter
 ```
 
 
@@ -52,11 +56,25 @@ summary(disney_data)
 
 new_data <- 
   disney_data %>%
-  select(Year, ...2) %>% 
-  left_join(box_data %>% select(Year, ...2),
+  select(Year, Percent) %>% 
+  filter(Year > 1999, na.rm = TRUE) %>%
+  right_join(box_data %>% select(Year,Tickets),
             by = c("Year" = "Year")) 
+
+new_data$Tickets / 100   
+new_data$Tickets_multi <- new_data$Tickets / 100    
+new_data 
+
+new_data_plot <- ggplot(new_data, aes(x=Year, y)) +
+  geom_point(aes(y = Percent), color = "purple") +
+  geom_point(aes(y = Tickets_multi), color = "blue")
+new_data_plot
+
 plot(new_data)
-summary(new_data)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+A year we might ignore is 2020 because the COVID-19 pandemic shut down many movie theaters across the US and Canada, causing the data point to be an outlier with the rest of the other years. But, if it does not affect the data, we will leave the data point in.
+
+I think there will be a relationship with how many tickets were sold at the box office and the box office market share that Disney had that year. 
+
+
