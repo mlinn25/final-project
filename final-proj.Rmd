@@ -29,7 +29,7 @@ box_data <- statistic_id187073_tickets_sold_at_box_offices_in_the_us_canada1980_
   rename_at(1, ~'Year') %>%
   rename_at(2, ~ 'Tickets') %>%
   filter(Year > 1999)
-box_data
+head(box_data)
 library(readxl)
 statistic_id187300_box_office_market_share_of_disney_in_the_us_canada_2000_2021 <- read_excel("~/Downloads/statistic_id187300_box-office-market-share-of-disney-in-the-us-canada-2000-2021.xlsx", 
     sheet = "Data")
@@ -37,12 +37,12 @@ disney_data <- statistic_id187300_box_office_market_share_of_disney_in_the_us_ca
   select(`Box office market share of Disney in the U.S. & Canada 2000-2021`, ...2) %>%
   rename_at(1, ~'Year') %>%
   rename_at(2, ~'Percent')
-disney_data
-?filter
+head(disney_data)
+
 ```
 
 
-## Initial EDA
+## EDA
 
 For my final project, I want to examine the relationship between the tickets sold at the box office in the US and Canada and the box office market share of Disney in the US and Canada. I want to statistically show a significance between the number of tickets sold at the box office and the box office market share of Disney to show a correlation between Disney and their advantage of getting more people to see their movies in theaters. Disney is a multibillion dollar company, carrying a significant weight in helping drive more people to the movies based on what they film that year and release it. Both of these data sets come from Statista, a free website with access to millions of data sets. These data sets were collected using public information with ticket sales and the shares of the market. The box office data was collected from 1980-2021, but I will only be looking at the data from 2000-2021, since I am comparing the number of ticket sales each year and how much percentage of Disney is in the box office market share. This data was collected from movie theaters in Canada and the US and was calculated with what percentage Disney makes up those box office tickets/earnings. 
 Null hypothesis: there is no relationship between the amount of tickets sold at the box office and the box office market share of Disney
@@ -67,7 +67,8 @@ new_data
 
 new_data_plot <- ggplot(new_data, aes(x=Year, y)) +
   geom_point(aes(y = Percent), color = "purple") +
-  geom_point(aes(y = Tickets_multi), color = "blue")
+  geom_point(aes(y = Tickets_multi), color = "blue") +
+  xlab("Year")
 new_data_plot
 
 plot(new_data)
@@ -75,6 +76,56 @@ plot(new_data)
 
 A year we might ignore is 2020 because the COVID-19 pandemic shut down many movie theaters across the US and Canada, causing the data point to be an outlier with the rest of the other years. But, if it does not affect the data, we will leave the data point in.
 
-I think there will be a relationship with how many tickets were sold at the box office and the box office market share that Disney had that year. 
+I decided to change the Tickets variable to Tickets_multi variable so it would fit better on the graph and we can see more clearly how the data compares to each other. The Tickets variable is in millions and Tickets_multi variable is in hundred millions.
+
+```{r}
+new_data <-
+  new_data %>% 
+  mutate(percent_ticket = Percent / Tickets_multi)
+new_data %>%
+  summarise(average_percent  = mean(Percent, na.rm=TRUE),
+            highest_percent = max(Percent, na.rm=TRUE),
+            smallest_percent = min(Percent, na.rm=TRUE))
+new_data %>%
+  summarise(average_tickets  = mean(Tickets_multi, na.rm=TRUE),
+            highest_tickets = max(Tickets_multi, na.rm=TRUE),
+            smallest_tickets = min(Tickets_multi, na.rm=TRUE))
+new_data %>%
+  summarise(average_combo  = mean(percent_ticket, na.rm=TRUE),
+            highest_combo = max(percent_ticket, na.rm=TRUE),
+            smallest_combo = min(percent_ticket, na.rm=TRUE))
+```
+The average percentage of box office market share of Disney from 2000 to 2021 is 16.66. The highest percentage recorded of box office market share of Disney is 33.1 in 2019, while the smallest percentage of box office market share of Disney is 10.4 in 2005. 
+
+The average number of box office tickets sold in the hundred millions from 2000 to 2021 is 12.7827. The highest number of box office tickets sold in the hundred millions is 15.7579 in 2002. The smallest number of box office tickets sold in the hundred millions is 2.2176 in 2020. 
+
+The average percent / ticket from 2000 to 2021 is 1.584415. The highest percent / ticket from 2000 to 2021 is 5.185786 in 2020. The smallest percent / ticket from 2000 to 2021 is 0.7425857 in 2001. This means that the box office market share of Disney was significantly higher than the box office tickets sold in the hundred millions in 2020. This means that the movie part of Disney was less affected by the Covid-19 than the rest of the movie industry, most likely due to their dedicated fan base than other movies that were released in 2020 from other production studios. 
 
 
+```{r}
+new_data %>% 
+  ggplot(aes(x = Year, y= percent_ticket)) +
+  geom_point(color="purple")
+```
+
+This point graph shows an exponential relationship in Percent/Ticket_multi and Year, meaning that Disney box office market share has only grown, even with the decline of movie tickets sold with the 2020 Covid-19 pandemic closing movie theaters. I don't believe this exponential relationship will continue because with more movie theaters opening back up and the movie market going back to pre-pandemic numbers, I believe it will continue to be the slowly increasing, but stagnant line that we see in years before 2020 and 2021.
+
+```{r}
+new_data %>% 
+  filter(grepl("^0.", percent_ticket, ignore.case = TRUE)) 
+new_data %>% 
+  filter(grepl("^1.", percent_ticket, ignore.case = TRUE)) 
+new_data %>% 
+  filter(grepl("^2.", percent_ticket, ignore.case = TRUE)) 
+new_data %>% 
+  filter(grepl("^3.", percent_ticket, ignore.case = TRUE)) 
+new_data %>% 
+  filter(grepl("^4.", percent_ticket, ignore.case = TRUE)) 
+new_data %>% 
+  filter(grepl("^5.", percent_ticket, ignore.case = TRUE)) 
+```
+There are 8 years where the percent_ticket value starts with 0. This means that the box office ticket sales in the hundred millions were higher than the box office market share of Disney in percent. There are 10 years where the percent_ticket value starts with 1. This means that the box office ticket sales in the hundred millions were about the same to the box office market share of Disney in percent. This means those 18 years, Disney was not as influential with attracting people to the movies because the percent_ticket variable would be higher if Disney's influence of box office market share percent was higher. There are 2 years where the percent_ticket value starts with 2 and 2 years where the percent_ticket value starts with 5. These 4 years demonstrate that Disney's box office market share in percent was highly influential, meaning that more people went to see Disney movies in general than other movies. The pandemic had a significant role in what people would want to see, if they went to the movies at all. 
+
+## Conclusion
+
+With the EDA that I performed, I believe there is a weak relationship between the amount of movie tickets sold in the hundred millions and the box office market share of Disney in percent. With the Covid-19 pandemic, we see that the box office market share of Disney in percent increased exponentially compared to the number of movie tickets sold in the hundred millions. The years prior to the Covid-19 pandemic, we see there is a relationship between the two variables. In 2009, Disney bought Marvel and in 2012, Disney bought Star Wars, some of the biggest franchises ever created in cinema history. After the Star Wars purchase, we see the box office market share of Disney slowly increase, until then it exponentially increases with the Covid years. 
