@@ -82,6 +82,9 @@ I decided to change the Tickets variable to Tickets_multi variable so it would f
 new_data <-
   new_data %>% 
   mutate(percent_ticket = Percent / Tickets_multi)
+new_data_narrow <-
+  new_data %>%
+  pivot_wider(names_from = Year, values_from = percent_ticket)
 new_data %>%
   summarise(average_percent  = mean(Percent, na.rm=TRUE),
             highest_percent = max(Percent, na.rm=TRUE),
